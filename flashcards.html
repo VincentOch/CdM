@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Révision">
+<title>Révision — Corps des Mines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --text: #1A1916;
+    --text2: #6B6860;
+    --text3: #A8A59E;
+    --border: rgba(26,25,22,0.1);
+    --border2: rgba(26,25,22,0.18);
+    --accent: #1A3C5E;
+    --accent-light: #E8EFF6;
+    --green: #1D6A47;
+    --green-light: #E6F4EC;
+    --red: #8B2020;
+    --red-light: #F5E8E8;
+    --gold: #8A6A2E;
+    --gold-light: #F5EFE0;
+    --r: 14px;
+    --r-sm: 8px;
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'DM Serif Display', serif;
+    --shadow: 0 2px 16px rgba(26,25,22,0.08), 0 1px 3px rgba(26,25,22,0.06);
+    --shadow-lg: 0 8px 32px rgba(26,25,22,0.12), 0 2px 8px rgba(26,25,22,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1C1C1B;
+      --surface2: #252522;
+      --text: #F0EDE6;
+      --text2: #9B9890;
+      --text3: #5C5A55;
+      --border: rgba(240,237,230,0.1);
+      --border2: rgba(240,237,230,0.18);
+      --accent: #6FA8DC;
+      --accent-light: #1A2A3A;
+      --green: #4CAF80;
+      --green-light: #152A20;
+      --red: #E07070;
+      --red-light: #2A1515;
+      --gold: #D4A84B;
+      --gold-light: #2A2010;
+      --shadow: 0 2px 16px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+    }
+  }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  #app {
+    height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: env(safe-area-inset-top, 20px) 0 env(safe-area-inset-bottom, 20px);
+    display: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { display: block; }
+  .pad { padding: 0 20px; }
+
+  /* ── TYPOGRAPHY ── */
+  .title-serif {
+    font-family: var(--serif);
+    font-size: 32px;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  /* ── HOME ── */
+  .home-header {
+    padding: 28px 20px 0;
+    margin-bottom: 24px;
+  }
+  .home-header .subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 20px;
+    margin-bottom: 24px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-box .lbl {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .section-block {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px;
+    margin: 0 20px 16px;
+  }
+  .section-block .section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .cats-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    border: none;
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: var(--sans);
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cat-pill.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .clear-btn {
+    font-size: 12px;
+    color: var(--text3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-info {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 0 20px;
+    margin-bottom: 16px;
+  }
+  .btn-primary {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 0 20px 10px;
+    padding: 16px;
+    border-radius: var(--r);
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-secondary {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 0 20px 10px;
+    padding: 14px;
+    border-radius: var(--r);
+    border: 0.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 14px;
+    font-family: var(--sans);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    height: 2px;
+    background: var(--surface2);
+    margin: 0 20px 0;
+  }
+  .progress-bar-fill {
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  /* ── STUDY SCREEN ── */
+  .study-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 14px;
+  }
+  .nav-back {
+    font-size: 22px;
+    color: var(--text2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    -webkit-tap-highlight-color: transparent;
+    padding: 4px;
+  }
+  .nav-counter {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+
+  .card-area {
+    padding: 0 20px;
+    position: relative;
+    touch-action: pan-y;
+  }
+  .flashcard {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    position: relative;
+    cursor: pointer;
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .card-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+  .card-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .card-cat {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: var(--surface2);
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  .card-source {
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .card-side-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .card-side-label.question { color: var(--text3); }
+  .card-side-label.answer { color: var(--accent); }
+  .card-question-text {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .card-answer-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+  .card-answer-text strong {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .card-hint {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* swipe indicators */
+  .swipe-badge {
+    position: absolute;
+    top: 18px;
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .swipe-badge.left { right: 18px; background: var(--red-light); color: var(--red); }
+  .swipe-badge.right { left: 18px; background: var(--green-light); color: var(--green); }
+  .swipe-badge.show { opacity: 1; }
+
+  /* action buttons */
+  .action-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px 20px;
+  }
+  .btn-know {
+    padding: 15px;
+    border-radius: var(--r);
+    border: none;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .btn-know:active { opacity: 0.8; }
+  .btn-revoir {
+    padding: 15px;
+    border-radius: var(--r);
+    border: none;
+    background: var(--red-light);
+    color: var(--red);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity: 0.15s;
+  }
+  .btn-revoir:active { opacity: 0.8; }
+
+  .swipe-hints {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 20px 0;
+  }
+  .swipe-hint-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* ── DONE SCREEN ── */
+  .done-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .done-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .done-icon svg { width: 28px; height: 28px; stroke: var(--green); }
+
+  /* ── STATS SCREEN ── */
+  .stats-screen-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px 20px;
+  }
+  .stat-row-item {
+    padding: 12px 20px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-row-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .stat-row-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-row-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-row-bar-fill {
+    height: 3px;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .stat-row-num {
+    font-size: 11px;
+    color: var(--text3);
+    min-width: 72px;
+    text-align: right;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active .pad, .screen.active .stats-row,
+  .screen.active .section-block, .screen.active .btn-primary,
+  .screen.active .btn-secondary, .screen.active .filter-info {
+    animation: fadeIn 0.25s ease forwards;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="home-header">
+      <div class="title-serif">Révision</div>
+      <div class="subtitle">Corps des Mines · Fiches de connaissance</div>
+    </div>
+    <div class="stats-row" id="home-stats"></div>
+    <div class="section-block">
+      <div class="section-title">Filtrer par catégorie</div>
+      <div class="cats-wrap" id="cats-list"></div>
+      <button class="clear-btn" id="clear-cats-btn" style="display:none">Tout effacer</button>
+    </div>
+    <div class="filter-info" id="filter-info"></div>
+    <button class="btn-primary" id="start-btn">Commencer la session</button>
+    <button class="btn-secondary" id="stats-btn">Voir mes statistiques →</button>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="screen-study" class="screen">
+    <div class="study-nav">
+      <button class="nav-back" id="study-back">←</button>
+      <span class="nav-counter" id="study-counter"></span>
+      <div style="width:32px"></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="card-area" id="card-area">
+      <div class="flashcard" id="flashcard">
+        <div class="swipe-badge left" id="badge-left">À revoir ✗</div>
+        <div class="swipe-badge right" id="badge-right">Je sais ✓</div>
+        <div class="card-meta">
+          <div class="card-cats" id="card-cats"></div>
+          <span class="card-source" id="card-source"></span>
+        </div>
+        <div class="card-body" id="card-body"></div>
+        <div class="card-hint" id="card-hint">Appuie pour voir la réponse</div>
+      </div>
+    </div>
+    <div class="action-btns" id="action-btns" style="display:none">
+      <button class="btn-revoir" id="btn-revoir">À revoir ✗</button>
+      <button class="btn-know" id="btn-know">Je sais ✓</button>
+    </div>
+    <div class="swipe-hints" id="swipe-hints">
+      <div class="swipe-hint-item"><span>←</span><span>À revoir</span></div>
+      <div class="swipe-hint-item"><span>Je sais</span><span>→</span></div>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div id="screen-done" class="screen">
+    <div class="done-wrap">
+      <div class="done-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="title-serif" style="margin-bottom:8px">Session terminée</div>
+      <p style="color:var(--text2);font-size:14px;margin-bottom:36px;font-weight:300" id="done-msg"></p>
+      <button class="btn-primary" id="done-restart">Nouvelle session</button>
+      <button class="btn-secondary" id="done-home">Retour à l'accueil</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div id="screen-stats" class="screen">
+    <div class="stats-screen-header">
+      <button class="nav-back" id="stats-back">←</button>
+      <div class="title-serif" style="font-size:24px">Statistiques</div>
+    </div>
+    <div id="stats-list"></div>
+    <div style="height:30px"></div>
+  </div>
+
+</div>
+
+<script>
+const CARDS = [
+  { id:"rpa_001", categories:["cohésion","chiffres"], question:"Quel est l'écart de PIB/habitant entre la région la plus riche et la plus pauvre de France ?", answer:"<strong>69 288 €/hab</strong> en Île-de-France vs <strong>32 652 €/hab</strong> en Bourgogne-Franche-Comté (2023). Écart de 1 à 2. Revenu disponible : 27 060 € max (IDF) vs 19 509 € min (Hauts-de-France).", source:"RPA 2026" },
+  { id:"rpa_002", categories:["cohésion","chiffres"], question:"Combien de départements ont perdu de la population entre 2015 et 2021 ?", answer:"<strong>23 départements</strong> ont perdu de la population. La mission budgétaire Cohésion des territoires représente 18,5 Md€ en 2024, mais c'est une fraction de l'effort total très éclaté entre ministères.", source:"RPA 2026" },
+  { id:"rpa_003", categories:["santé","hôpital"], question:"Quel est le déficit des hôpitaux publics en 2023 et combien de sites hospitaliers existe-t-il ?", answer:"Déficit de <strong>2,4 milliards d'euros</strong> en 2023. La France compte <strong>2 380 sites hospitaliers</strong> et <strong>44 spécialités</strong> (contre 8 en 1947). 25 millions de malades chroniques génèrent 126 Md€ de dépenses.", source:"RPA 2026" },
+  { id:"rpa_004", categories:["santé","hôpital"], question:"Combien de GHT ont une direction commune sur les 135 existants ? Quelle est la solution ?", answer:"Seulement <strong>26 GHT sur 135</strong> ont une direction commune. Solution : fusionner les établissements en une seule personne morale, créer une gradation des soins (proximité / spécialisé / universitaire) et des autorisations multisites.", source:"RPA 2026" },
+  { id:"rpa_005", categories:["logement","social"], question:"Combien de demandes HLM sont en attente et combien d'attributions par an ?", answer:"<strong>2,8 millions de demandes</strong> en attente pour <strong>moins de 400 000 attributions/an</strong> (ratio 1 pour 7). Parc total : 4,8 M logements. <strong>72 % des ménages</strong> sont éligibles au logement social.", source:"RPA 2026" },
+  { id:"rpa_006", categories:["numérique","services publics"], question:"Quel pourcentage de Français sont en difficulté avec les démarches en ligne ?", answer:"<strong>44 % des Français</strong> en difficulté. <strong>32 %</strong> ont déjà renoncé à une démarche, <strong>8 %</strong> ont renoncé définitivement. Pourtant 1,3 milliard de démarches en ligne chaque année.", source:"RPA 2026" },
+  { id:"rpa_007", categories:["mobilité","transport"], question:"Quel est le besoin de financement supplémentaire pour les mobilités du quotidien ?", answer:"<strong>70 % des ruraux</strong> n'ont pas d'alternative à la voiture. Besoin de financement : <strong>3,7 à 6,7 Md€/an</strong> supplémentaires. 30 % des jeunes ruraux ont renoncé à se rendre sur leur lieu d'étude.", source:"RPA 2026" },
+  { id:"rpa_008", categories:["mobilité","transport"], question:"Que signifie le +7,7 % de km de transports collectifs entre 2019 et 2023 ?", answer:"Hausse du nombre total de kilomètres parcourus par TER, cars, métros et bus. Cela concerne <strong>surtout les zones denses</strong> — les zones rurales et périurbaines n'en bénéficient quasiment pas. C'est un rattrapage post-COVID urbain.", source:"RPA 2026" },
+  { id:"rpa_009", categories:["industrie","réindustrialisation"], question:"Quelle est la part de l'industrie dans le PIB français et les délais d'autorisation ?", answer:"<strong>11 % du PIB</strong> (contre 17 % en Allemagne) et 12 % de l'emploi salarié. Soutiens publics : <strong>26,8 Md€/an</strong> (2020-2022). Délai moyen pour les autorisations : <strong>17 mois</strong>. Foncier à mobiliser : 22 000 ha d'ici 2030.", source:"RPA 2026" },
+  { id:"rpa_010", categories:["emploi","chiffres"], question:"Quel est l'écart de taux de chômage entre les départements et la loi plein emploi ?", answer:"<strong>6 dép. > 11,9 % de chômage</strong> vs <strong>25 dép. < 6,4 %</strong>. Taux national : 7,5 % (T2 2025). Taux d'emploi : 69 % vs 70,8 % UE. La loi plein emploi 2023 crée 360 comités locaux pour l'emploi coprésidés État/collectivités.", source:"RPA 2026" },
+  { id:"rpa_011", categories:["sécurité","budget"], question:"Le budget sécurité a augmenté de 33 % depuis 2016. Quel est le paradoxe ?", answer:"Malgré <strong>+33 % de budget</strong> (24,4 Md€) et +10 000 postes, la délinquance a augmenté de <strong>+6,5 %</strong> depuis 2016. La répartition des effectifs ne correspond pas aux besoins réels. 28 000 policiers municipaux (80 % des communes > 3 500 hab).", source:"RPA 2026" },
+  { id:"rpa_012", categories:["politique ville","QPV"], question:"Combien de QPV existent et quel est le paradoxe des crédits spécifiques ?", answer:"<strong>1 609 QPV</strong> (8,7 % de la population). Pauvreté ×3 vs moyenne nationale. Les <strong>524 M€</strong> de crédits spécifiques se substituent souvent au droit commun au lieu de le compléter.", source:"RPA 2026" },
+  { id:"rpa_013", categories:["gouvernance","collectivités"], question:"Qu'est-ce qu'un CPER et combien y en a-t-il ?", answer:"<strong>Contrat de Plan État-Région</strong> : document pluriannuel co-signé État/région fixant les priorités d'investissement. Il y en a <strong>12 CPER + 849 CRTE</strong> signés depuis 2021. Ils représentent <strong>19,5 Md€</strong> de soutiens en 2024.", source:"RPA 2026" },
+  { id:"rpa_014", categories:["finances locales","péréquation"], question:"Qu'est-ce que la péréquation verticale et horizontale ? Montants ?", answer:"Total : <strong>14,4 Md€ en 2024</strong>. Péréquation <strong>verticale</strong> (État→collectivités via DGF) : <strong>10,2 Md€</strong>. Péréquation <strong>horizontale</strong> (riches→pauvres, FPIC…) : <strong>4,2 Md€</strong>. Écart résiduel après péréquation : 1 à 1,9.", source:"RPA 2026" },
+  { id:"rpa_015", categories:["éducation","collèges"], question:"Quelle est la baisse prévue du nombre de collégiens d'ici 2036 ?", answer:"<strong>−12 %</strong> de collégiens en moyenne nationale. <strong>20 départements</strong> perdront plus de 20 %. <strong>1 550 collèges</strong> très peu mixtes. <strong>75 %</strong> des collèges favorisés sont privés sous contrat.", source:"RPA 2026" },
+  { id:"rpa_016", categories:["numérique","couverture"], question:"Quel est le taux de couverture fibre en France en 2025 ?", answer:"<strong>92 %</strong> des locaux raccordables à la fibre (mars 2025). <strong>22 Md€</strong> investis depuis 2010. Mais <strong>215 800 personnes</strong> en zone blanche mobile. Fin du réseau cuivre d'ici 2030.", source:"RPA 2026" },
+  { id:"rpa_017", categories:["outre-mer","santé"], question:"Quel est le taux de pauvreté en outre-mer et la densité médicale ?", answer:"<strong>34,6 % de pauvreté</strong> (vs 15,4 % métropole). Densité médicale : <strong>39 à 174 praticiens/100k hab</strong> (vs 146 métropole). Attente cardio : <strong>42 jours</strong> vs 26. Diabète jusqu'à <strong>25 %</strong> de la population.", source:"RPA 2026" },
+  { id:"mp_001", categories:["énergie","chiffres"], question:"Quelle est la facture énergétique de la France en 2024 et quel était le pic ?", answer:"<strong>57,8 Md€</strong> en 2024 (≈ 850 €/hab). Pic en 2022 : <strong>116 Md€</strong> (+158 % vs 2021) à cause de la guerre en Ukraine et de la crise nucléaire. Pétrole seul = 43,7 Md€.", source:"Matières premières" },
+  { id:"mp_002", categories:["énergie","pétrole"], question:"Quel est le taux d'importation du pétrole français et d'où vient-il ?", answer:"<strong>98,3 %</strong> importé. Origines 2023 : Afrique subsaharienne <strong>21 %</strong>, Afrique du Nord <strong>18 %</strong>, Amérique du Nord <strong>17 %</strong>, Moyen-Orient <strong>17 %</strong>. Russie : 9 % en 2021 → quasi <strong>0 %</strong> en 2024.", source:"Matières premières" },
+  { id:"mp_003", categories:["énergie","gaz"], question:"D'où vient le gaz naturel importé par la France en 2024 ?", answer:"<strong>481 TWh</strong> importés. Norvège <strong>40 %</strong>, États-Unis <strong>21 %</strong> (GNL, en forte hausse), Russie <strong>18 %</strong> (en recul), Algérie <strong>11 %</strong>. Le GNL américain remplace le gaz russe mais est plus cher.", source:"Matières premières" },
+  { id:"mp_004", categories:["énergie","nucléaire"], question:"Quel est le paradoxe de l'indépendance énergétique française liée au nucléaire ?", answer:"Indépendance énergétique = <strong>61 %</strong> en 2024 (record depuis 1970). Mais l'uranium est <strong>100 % importé</strong> (Kazakhstan 30 %, Namibie 29 %, Niger 26 %). Sans uranium, l'indépendance chuterait à <strong>16 %</strong>. Stocks stratégiques : 2 à 3 ans.", source:"Matières premières" },
+  { id:"mp_005", categories:["métaux critiques","lithium"], question:"Qui contrôle l'extraction et le raffinage du lithium dans le monde ?", answer:"Extraction : Australie <strong>58 %</strong>, Chili <strong>20 %</strong>, Chine 11 %. Raffinage : <strong>Chine > 60 %</strong>. Demande mondiale ×6 à 13 d'ici 2035. Les batteries VE en auront besoin de <strong>×18 en 2030</strong> et <strong>×60 en 2050</strong>.", source:"Matières premières" },
+  { id:"mp_006", categories:["métaux critiques","cobalt"], question:"Quelle est la dépendance mondiale au cobalt et son risque géopolitique ?", answer:"RDC : <strong>68–70 %</strong> de l'extraction mondiale. Chine : <strong>65 %</strong> du raffinage. La RDC a suspendu ses exportations <strong>4 mois en 2025</strong>. Les entreprises chinoises contrôlent <strong>40 %</strong> des actifs miniers en RDC.", source:"Matières premières" },
+  { id:"mp_007", categories:["métaux critiques","terres rares"], question:"Quelle est la dépendance aux terres rares et à quoi servent-elles ?", answer:"Chine : <strong>70 %</strong> extraction, <strong>>90 %</strong> raffinage. Usages : aimants permanents (éoliennes, moteurs VE), écrans, lasers militaires. 1 éolienne offshore = <strong>600 kg</strong> de terres rares. Demande ×10 d'ici 2050. En 2010, Chine réduisant ses quotas → prix <strong>+300 à 900 %</strong>.", source:"Matières premières" },
+  { id:"mp_008", categories:["métaux critiques","cuivre"], question:"Pourquoi le cuivre est-il stratégique pour l'IA et la transition énergétique ?", answer:"Un data center IA consomme <strong>30 t de cuivre/MW</strong>. La puce Nvidia GB200 contient <strong>3,2 km de câbles cuivre</strong>. Demande data centers : <strong>400 000 t</strong> en 2025 → 600 000 t en 2028. Déficit anticipé : <strong>6 Mt/an</strong> d'ici 2035. Prix record : 12 222 $/t fin 2025 (+42 %).", source:"Matières premières" },
+  { id:"mp_009", categories:["métaux critiques","gallium"], question:"Quelle est la dépendance au gallium et quel signal d'alarme en 2024–2025 ?", answer:"Chine : <strong>98 %</strong> de la production mondiale. Utilisé dans les semi-conducteurs GaN (5G, radars, data centers). En décembre 2024, la Chine a <strong>interdit l'export de gallium, germanium et antimoine</strong> vers les États-Unis. L'IA pourrait consommer >10 % de la prod. mondiale de gallium d'ici 2030.", source:"Matières premières" },
+  { id:"mp_010", categories:["politique","CRMA"], question:"Qu'est-ce que le Critical Raw Materials Act (CRMA) et quels sont ses objectifs ?", answer:"Loi UE entrée en vigueur <strong>mai 2024</strong>. Objectifs 2030 : extraire <strong>10 %</strong> des besoins en UE, raffiner <strong>40 %</strong>, recycler <strong>25 %</strong>. Aucun pays tiers > <strong>65 %</strong> d'une matière. Délai d'autorisation : <strong>24 mois max</strong> pour une mine, 12 mois pour le recyclage.", source:"Matières premières" },
+  { id:"mp_011", categories:["politique","France 2030"], question:"Quel est le rôle de France 2030 dans les matières premières ?", answer:"Plan de <strong>54 Md€</strong> sur 5 ans. Matières premières = l'un des 6 leviers stratégiques. Finance : Gigafactory <strong>Verkor</strong> (Dunkerque), <strong>STMicroelectronics</strong> (semi-conducteurs), recyclage batteries (Orano), mines lithium (Imerys/Allier). Ne crée pas de mines mais finance l'aval et la R&D.", source:"Matières premières" },
+  { id:"mp_012", categories:["IA","semi-conducteurs"], question:"Quelle est la dépendance de la France aux semi-conducteurs et qui domine ?", answer:"La France ne fabrique pas de puces avancées. <strong>TSMC</strong> (Taïwan) = 50 % de la production mondiale. Gallium : Chine <strong>98 %</strong>. <strong>European Chips Act</strong> (2023) : <strong>43 Md€</strong> pour atteindre 20 % de la production mondiale d'ici 2030 (vs 8 % aujourd'hui).", source:"Matières premières" },
+  { id:"mp_013", categories:["IA","numérique"], question:"Quelle est l'empreinte en matières premières du numérique français ?", answer:"Numérique = <strong>2,5 %</strong> de l'empreinte carbone (2020) et <strong>10 %</strong> de la consommation électrique. Environ <strong>50 métaux différents</strong> dans nos équipements numériques, quasi aucun produit en France. Avec l'IA, la demande explose.", source:"Matières premières" },
+  { id:"mp_014", categories:["chiffres","global"], question:"Combien de matières premières la France importe-t-elle et quelle est sa consommation totale ?", answer:"<strong>813 Mt</strong> consommées en 2023 (11,9 t/hab, sous la moyenne UE de 13,5 t/hab). Importations : <strong>309 Mt</strong> dont pétrole 98 Mt, minerais 98 Mt, biomasse 62 Mt. Productivité matières : <strong>3,1 €/kg</strong> (+18 % depuis 2010).", source:"Matières premières" },
+  { id:"ue_001", categories:["UE","budget","chiffres"], question:"Quelle est la contribution de la France au budget UE et son solde net ?", answer:"Contribution : <strong>~23 Md€</strong> en 2024 (≈17 % du total). Retours : <strong>25,3 Md€</strong> (dont 8,9 Md€ NextGenEU). Solde net 2024 : <strong>+3 Md€</strong> (exceptionnel). Hors NextGenEU : <strong>−9,3 Md€</strong>. 2e contributeur et 2e bénéficiaire en volume.", source:"France & UE" },
+  { id:"ue_002", categories:["UE","PAC","agriculture"], question:"Quelle est la position de la France dans la PAC européenne ?", answer:"<strong>1er bénéficiaire</strong> en volume : 17,5 % des aides (<strong>~10 Md€/an</strong>). PAC totale = <strong>54 Md€/an</strong> sur le budget UE. Sous pression : verdissement obligatoire, baisse post-2027, tensions avec pays de l'Est.", source:"France & UE" },
+  { id:"ue_003", categories:["UE","NextGenerationEU"], question:"Combien la France reçoit-elle de NextGenerationEU et pour quoi ?", answer:"<strong>40 Md€</strong> alloués 2021-2026, <strong>34,2 Md€</strong> reçus à mai 2025 (85 %). Priorités : transition verte (1er), numérique, cohésion sociale, santé. Ex : rénovation thermique, décarbonation industrie, métro de Toulouse.", source:"France & UE" },
+  { id:"ue_004", categories:["UE","spatial","industrie"], question:"Quelle est la place de la France dans le programme spatial européen ?", answer:"<strong>1er bénéficiaire : 39 %</strong> des fonds spatiaux (<strong>818 M€</strong>). Acteurs : CNES, Airbus D&S. Programmes : Galileo, Copernicus, EGNOS. <strong>Kourou (Guyane)</strong> = port spatial de l'UE.", source:"France & UE" },
+  { id:"ue_005", categories:["UE","institutions"], question:"Quelles sont les 3 grandes institutions financières de l'UE et leurs rôles ?", answer:"<strong>BCE</strong> (Francfort) : politique monétaire zone euro. <strong>BEI</strong> (Luxembourg) : prêts long terme pour l'infrastructure et la transition. <strong>Commission DG Budget</strong> : exécution et contrôle. La Banque de France est membre du SEBC.", source:"France & UE" },
+  { id:"ue_006", categories:["UE","cohésion","fonds"], question:"Combien la France reçoit-elle des fonds structurels UE (FEDER/FSE+) sur 2021-2027 ?", answer:"<strong>18 Md€</strong> sur 2021-2027. Gérés par les <strong>Régions</strong>. Ciblés sur les DOM (zones 'moins développées'), zones rurales et bassins en reconversion. La France reçoit moins que la Pologne (75 Md€) car calculé sur le PIB/habitant régional.", source:"France & UE" },
+  { id:"ue_007", categories:["UE","CRMA","métaux critiques"], question:"Quels sont les projets stratégiques français labellisés CRMA par l'UE en mars 2025 ?", answer:"8 projets : mine de lithium <strong>Imerys</strong> (Allier), mine lithium <strong>Eramet</strong> (Alsace), <strong>MAGFACTORY</strong> aimants recyclés (Isère), <strong>HYDROMETALLURGY</strong> recyclage batteries Orano (Nord), SANDGRAPHITE (Pas-de-Calais). Labels = accès financements prioritaires BEI/EU.", source:"France & UE" },
+  { id:"ue_008", categories:["UE","recherche","Horizon"], question:"Quelle est la place de la France dans Horizon Europe ?", answer:"<strong>1,23 Md€</strong> reçus en 2024. Bénéficiaires : CNRS, INRIA, INSERM, CEA. Horizon Europe = <strong>12,9 Md€/an</strong> au niveau européen. <strong>470 M€</strong> réservés spécifiquement pour les matières premières critiques.", source:"France & UE" }
+];
+
+const ALL_CATS = [...new Set(CARDS.flatMap(c => c.categories))].sort();
+
+// ── STORAGE ──
+const STORAGE_KEY = "flashcards_v2";
+let stats = {};
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    stats = raw ? JSON.parse(raw) : {};
+  } catch { stats = {}; }
+  CARDS.forEach(c => {
+    if (!stats[c.id]) stats[c.id] = { seen: 0, known: 0, unknown: 0, lastSeen: 0 };
+  });
+}
+
+function saveStats() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch {}
+}
+
+function getScore(id) {
+  const s = stats[id];
+  if (!s || s.seen === 0) return null;
+  return s.known / s.seen;
+}
+
+// ── DECK BUILDER ──
+let filterCats = [];
+let deck = [];
+let deckIdx = 0;
+let isFlipped = false;
+
+function buildDeck() {
+  let pool = filterCats.length > 0
+    ? CARDS.filter(c => c.categories.some(cat => filterCats.includes(cat)))
+    : [...CARDS];
+
+  const scored = pool.map(c => {
+    const s = stats[c.id];
+    const score = getScore(c.id);
+    const freshness = Date.now() - (s.lastSeen || 0);
+    let priority = 0;
+    if (score === null) priority = 10;
+    else priority = (1 - score) * 5 + (freshness > 1800000 ? 1 : 0);
+    return { ...c, _p: priority };
+  });
+
+  scored.sort((a, b) => b._p - a._p);
+  const top = scored.slice(0, Math.min(scored.length, 25));
+  for (let i = top.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [top[i], top[j]] = [top[j], top[i]];
+  }
+  return top;
+}
+
+// ── SCREENS ──
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + id).classList.add("active");
+}
+
+// ── HOME ──
+function renderHome() {
+  const totalSeen = CARDS.filter(c => stats[c.id] && stats[c.id].seen > 0).length;
+  const totalMastered = CARDS.filter(c => {
+    const sc = getScore(c.id);
+    return sc !== null && sc >= 0.7;
+  }).length;
+
+  document.getElementById("home-stats").innerHTML = `
+    <div class="stat-box"><div class="num">${CARDS.length}</div><div class="lbl">Fiches</div></div>
+    <div class="stat-box"><div class="num">${totalSeen}</div><div class="lbl">Vues</div></div>
+    <div class="stat-box"><div class="num">${totalMastered}</div><div class="lbl">Maîtrisées</div></div>
+  `;
+
+  const catsList = document.getElementById("cats-list");
+  catsList.innerHTML = "";
+  ALL_CATS.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "cat-pill" + (filterCats.includes(cat) ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => toggleCat(cat));
+    catsList.appendChild(btn);
+  });
+
+  const clearBtn = document.getElementById("clear-cats-btn");
+  clearBtn.style.display = filterCats.length > 0 ? "block" : "none";
+
+  const filtered = filterCats.length > 0
+    ? CARDS.filter(c => c.categories.some(cat => filterCats.includes(cat)))
+    : CARDS;
+  document.getElementById("filter-info").textContent =
+    `${filtered.length} fiche${filtered.length > 1 ? "s" : ""} sélectionnée${filtered.length > 1 ? "s" : ""}`;
+}
+
+function toggleCat(cat) {
+  const idx = filterCats.indexOf(cat);
+  if (idx >= 0) filterCats.splice(idx, 1);
+  else filterCats.push(cat);
+  renderHome();
+}
+
+document.getElementById("clear-cats-btn").addEventListener("click", () => {
+  filterCats = [];
+  renderHome();
+});
+
+// ── STUDY ──
+function startStudy() {
+  deck = buildDeck();
+  deckIdx = 0;
+  isFlipped = false;
+  if (deck.length === 0) return;
+  show("study");
+  renderCard();
+}
+
+function renderCard() {
+  if (deckIdx >= deck.length) {
+    showDone();
+    return;
+  }
+  const card = deck[deckIdx];
+  isFlipped = false;
+
+  document.getElementById("study-counter").textContent = `${deckIdx + 1} / ${deck.length}`;
+  document.getElementById("progress-fill").style.width = `${((deckIdx + 1) / deck.length) * 100}%`;
+
+  document.getElementById("card-cats").innerHTML = card.categories
+    .map(c => `<span class="card-cat">${c}</span>`).join("");
+  document.getElementById("card-source").textContent = card.source;
+  document.getElementById("card-hint").style.display = "block";
+  document.getElementById("action-btns").style.display = "none";
+  document.getElementById("swipe-hints").style.display = "flex";
+
+  showQuestion(card);
+  resetCardTransform();
+}
+
+function showQuestion(card) {
+  document.getElementById("card-body").innerHTML = `
+    <div class="card-side-label question">Question</div>
+    <div class="card-question-text">${card.question}</div>
+  `;
+  document.getElementById("card-hint").textContent = "Appuie pour voir la réponse";
+}
+
+function showAnswer(card) {
+  document.getElementById("card-body").innerHTML = `
+    <div class="card-side-label answer">Réponse</div>
+    <div class="card-answer-text">${card.answer}</div>
+  `;
+  document.getElementById("card-hint").style.display = "none";
+  document.getElementById("action-btns").style.display = "grid";
+  document.getElementById("swipe-hints").style.display = "none";
+}
+
+document.getElementById("flashcard").addEventListener("click", () => {
+  if (!isFlipped) {
+    isFlipped = true;
+    showAnswer(deck[deckIdx]);
+  }
+});
+
+function recordAndNext(known) {
+  const card = deck[deckIdx];
+  const s = stats[card.id];
+  s.seen++;
+  s.lastSeen = Date.now();
+  if (known) s.known++;
+  else s.unknown++;
+  saveStats();
+  deckIdx++;
+  renderCard();
+}
+
+document.getElementById("btn-know").addEventListener("click", () => {
+  animateSwipe("right", () => recordAndNext(true));
+});
+document.getElementById("btn-revoir").addEventListener("click", () => {
+  animateSwipe("left", () => recordAndNext(false));
+});
+
+// ── SWIPE ──
+let touchStartX = 0, touchStartY = 0, touchDelta = 0, touching = false;
+const fc = document.getElementById("flashcard");
+const badgeL = document.getElementById("badge-left");
+const badgeR = document.getElementById("badge-right");
+
+fc.addEventListener("touchstart", e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchDelta = 0;
+  touching = true;
+}, { passive: true });
+
+fc.addEventListener("touchmove", e => {
+  if (!touching) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  if (Math.abs(dx) < Math.abs(dy) && Math.abs(touchDelta) < 10) return;
+  touchDelta = dx;
+  fc.style.transform = `translateX(${dx}px) rotate(${dx * 0.04}deg)`;
+  fc.style.transition = "none";
+  badgeL.classList.toggle("show", dx < -40);
+  badgeR.classList.toggle("show", dx > 40);
+}, { passive: true });
+
+fc.addEventListener("touchend", () => {
+  touching = false;
+  badgeL.classList.remove("show");
+  badgeR.classList.remove("show");
+  if (Math.abs(touchDelta) > 70) {
+    const dir = touchDelta > 0 ? "right" : "left";
+    animateSwipe(dir, () => recordAndNext(dir === "right"));
+  } else {
+    resetCardTransform();
+    if (Math.abs(touchDelta) < 10) {
+      if (!isFlipped) { isFlipped = true; showAnswer(deck[deckIdx]); }
+    }
+  }
+  touchDelta = 0;
+});
+
+function animateSwipe(dir, cb) {
+  fc.style.transition = "transform 0.28s ease, opacity 0.28s ease";
+  fc.style.transform = `translateX(${dir === "right" ? 120 : -120}%) rotate(${dir === "right" ? 15 : -15}deg)`;
+  fc.style.opacity = "0";
+  setTimeout(() => {
+    fc.style.transition = "none";
+    fc.style.opacity = "1";
+    fc.style.transform = "none";
+    cb();
+  }, 280);
+}
+
+function resetCardTransform() {
+  fc.style.transition = "transform 0.2s ease";
+  fc.style.transform = "none";
+  fc.style.opacity = "1";
+}
+
+// ── DONE ──
+function showDone() {
+  document.getElementById("done-msg").textContent = `${deck.length} fiche${deck.length > 1 ? "s" : ""} parcourue${deck.length > 1 ? "s" : ""}`;
+  show("done");
+}
+
+document.getElementById("done-restart").addEventListener("click", startStudy);
+document.getElementById("done-home").addEventListener("click", () => { renderHome(); show("home"); });
+
+// ── STATS SCREEN ──
+function renderStats() {
+  const rows = CARDS.map(c => ({ card: c, s: stats[c.id] }))
+    .sort((a, b) => {
+      const sa = a.s.seen === 0 ? -1 : getScore(a.card.id);
+      const sb = b.s.seen === 0 ? -1 : getScore(b.card.id);
+      return sa - sb;
+    });
+
+  document.getElementById("stats-list").innerHTML = rows.map(({ card, s }) => {
+    const score = s.seen > 0 ? Math.round(getScore(card.id) * 100) : null;
+    const barColor = score === null ? "var(--text3)" : score >= 70 ? "var(--green)" : score >= 40 ? "var(--gold)" : "var(--red)";
+    const label = score === null ? "non vu" : `${score}% · ${s.seen}×`;
+    return `<div class="stat-row-item">
+      <div class="stat-row-text">${card.question.substring(0, 65)}…</div>
+      <div class="stat-row-bar-wrap">
+        <div class="stat-row-bar"><div class="stat-row-bar-fill" style="width:${score ?? 0}%;background:${barColor}"></div></div>
+        <span class="stat-row-num">${label}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── NAV ──
+document.getElementById("start-btn").addEventListener("click", startStudy);
+document.getElementById("stats-btn").addEventListener("click", () => { renderStats(); show("stats"); });
+document.getElementById("study-back").addEventListener("click", () => { renderHome(); show("home"); });
+document.getElementById("stats-back").addEventListener("click", () => { renderHome(); show("home"); });
+
+// ── INIT ──
+loadStats();
+renderHome();
+</script>
+</body>
+</html>
